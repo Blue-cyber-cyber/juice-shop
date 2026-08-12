@@ -1,0 +1,30 @@
+name: DevSecOps Pipeline
+
+on: [push]
+
+jobs:
+  sast-scan:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        run: semgrep --config=auto --severity=ERROR --error .
+
+  container-scan:
+    runs-on: self-hosted
+    needs: sast-scan
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t juice-shop:${{ github.sha }} .
+      - name: Trivy scan (fail on CRITICAL)
+        run: trivy image --severity CRITICAL --exit-code 1 juice-shop:${{ github.sha }}
+
+  push-to-registry:
+    runs-on: self-hosted
+    needs: container-scan
+    steps:
+      - name: Tag and push
+        run: |
+          docker tag juice-shop:${{ github.sha }} 192.168.56.50:5000/juice-shop:${{ github.sha }}
+          docker push 192.168.56.50:5000/juice-shop:${{ github.sha }}
