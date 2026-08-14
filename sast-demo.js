@@ -1,4 +1,4 @@
 
-// Intentionally vulnerable pattern for SAST gate demo
-const password = "hardcoded-secret-123";
-console.log("Connecting with password: " + password);
+// Fixed: credentials now loaded from environment
+const password = process.env.APP_PASSWORD;
+console.log("Connecting using environment-configured credentials");
