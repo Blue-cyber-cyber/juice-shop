@@ -1,3 +1,6 @@
+
+
+
 name: DevSecOps Pipeline
 
 on: [push]
@@ -16,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image
-        run: docker build -t juice-shop:${{ github.sha }} .
+        run: docker build -f Dockerfile.demo -t juice-shop:${{ github.sha }} .
       - name: Trivy scan (fail on CRITICAL)
         run: trivy image --severity CRITICAL --exit-code 1 juice-shop:${{ github.sha }}
 
